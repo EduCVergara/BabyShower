@@ -16,7 +16,7 @@ const layout = {
   parents: { x: 70.5, y: 67, width: 19, height: 6, fontSize: 2.5 },
   locationLabel: { x: 53, y: 75, width: 23, height: 2.8, fontSize: 2.8 },
   address: { x: 53, y: 78, width: 27, height: 4, fontSize: 2.6 },
-  farewell: { x: 50, y: 94, width: 48, height: 5.5, fontSize: 5.8 },
+  farewell: { x: 50, y: 93.3, width: 48, height: 5.5, fontSize: 4 },
 } satisfies Record<string, Placement>;
 
 type TextLayout = typeof layout;
@@ -112,15 +112,17 @@ export const templates = {
   },
 };
 
+const babyName='Lucía Trinidad';
+
 export const invitation = {
   // Selecciona 'rosa' o 'celeste'. Cambiar el fondo conserva tus textos.
   template: 'rosa' as keyof typeof templates,
-  title: 'Baby Shower de Lucía Trinidad',
-  description: '¡Te esperamos para celebrar la llegada de Lucía Trinidad!',
+  title: `Baby Shower de ${babyName}`,
+  description: `¡Te esperamos para celebrar la llegada de ${babyName}!`,
   // Elevación del centro del nombre como fracción de su ancho (0 = recto).
   nameArc: 0.045,
   text: {
-    name: 'Lucía Trinidad', event: 'BABY SHOWER',
+    name: babyName, event: 'BABY SHOWER',
     introduction: 'Una hermosa princesa pronto llegará a iluminar\nnuestras vidas. Esperamos compartir juntos y así\ncelebrar la vida y llegada de nuestra bebé',
     announcement: '¡TE INVITAMOS A CELEBRAR CON NOSOTROS!',
     weekday: 'SÁBADO', day: '19', month: 'SEPTIEMBRE',
@@ -131,7 +133,7 @@ export const invitation = {
   },
   whatsapp: {
     // Número internacional, solo dígitos.
-    phone: '56998692235', message: '¡Confirmo mi asistencia!',
+    phone: '56998692235', message: `Hola, ¡Confirmo mi asistencia al Baby Shower de ${babyName}!`,
   },
   location: {
     latitude: -27.075361362626538 as number | null,
