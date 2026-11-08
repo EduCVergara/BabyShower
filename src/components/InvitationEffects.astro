@@ -1,0 +1,90 @@
+---
+type Props = {
+  enabled: boolean;
+  effects: { opening: boolean; cursorTrail: boolean; touchBurst: boolean };
+};
+const { enabled, effects } = Astro.props;
+---
+
+{enabled && <>
+  {effects.opening && <div data-opening class="pointer-events-none fixed inset-0 z-50 grid animate-opening-veil place-items-center overflow-hidden bg-(--paper) motion-reduce:hidden" aria-hidden="true">
+    <div class="relative size-[min(76vw,380px)]">
+      <div class="absolute inset-[-18%] animate-powder-ring rounded-full bg-[conic-gradient(from_0deg,transparent,var(--accent),#f3d5ad,var(--accent),transparent)] blur-[14px] [mask-image:radial-gradient(circle,transparent_43%,#000_56%,#000_64%,transparent_73%)]" />
+      <div class="absolute inset-[9%] animate-powder-ring rounded-full border border-(--accent)/50 shadow-[0_0_28px_var(--accent),inset_0_0_24px_var(--accent)] blur-[3px] [animation-delay:-0.2s]" />
+      {Array.from({ length: 64 }, (_, i) => {
+        const angle = i * 2.39996;
+        const radius = 34 + (i % 7) * 2;
+        return <span class="absolute left-1/2 top-1/2 size-(--mote-size) animate-opening-mote rounded-full bg-(--accent) opacity-0 shadow-[0_0_8px_var(--accent)] [animation-delay:var(--delay)]" style={`--dx:${Math.cos(angle) * radius}vw;--dy:${Math.sin(angle) * radius}vw;--delay:${(i % 9) * 45}ms;--mote-size:${2 + i % 5}px`} />;
+      })}
+      <div class="absolute inset-[32%] animate-powder-ring rounded-full bg-white/80 blur-2xl" />
+    </div>
+  </div>}
+  <div data-pointer-effects data-trail={effects.cursorTrail} data-burst={effects.touchBurst}
+    class="pointer-events-none fixed inset-0 z-[60] overflow-hidden motion-reduce:hidden" aria-hidden="true" />
+</>}
+
+<script>
+  const layer = document.querySelector<HTMLElement>('[data-pointer-effects]');
+  if (layer) {
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    const finePointer = matchMedia('(any-pointer: fine)');
+    const symbols = ['✧', '♡', '❀', '✦'];
+    let lastTime = 0;
+    let lastX = 0;
+    let lastY = 0;
+
+    function particle(x: number, y: number, dx: number, dy: number, size: number, index: number, duration: number) {
+      if (!layer || layer.childElementCount >= 100) return;
+      const node = document.createElement('span');
+      node.className = 'absolute left-0 top-0 select-none font-body leading-none text-(--accent) will-change-transform';
+      node.textContent = symbols[index % symbols.length];
+      node.style.fontSize = `${size}px`;
+      node.style.color = index % 3 === 0 ? '#c49a60' : 'var(--accent)';
+      layer.append(node);
+      const animation = node.animate([
+        { transform: `translate(${x}px,${y}px) translate(-50%,-50%) scale(.4) rotate(0deg)`, opacity: 0 },
+        { transform: `translate(${x + dx * .2}px,${y + dy * .2}px) translate(-50%,-50%) scale(1) rotate(15deg)`, opacity: .95, offset: .18 },
+        { transform: `translate(${x + dx}px,${y + dy}px) translate(-50%,-50%) scale(.25) rotate(80deg)`, opacity: 0 },
+      ], { duration, easing: 'cubic-bezier(.16,.7,.3,1)', fill: 'forwards' });
+      animation.finished.then(() => node.remove(), () => node.remove());
+    }
+
+    document.addEventListener('pointermove', event => {
+      if (reducedMotion.matches || !finePointer.matches || event.pointerType !== 'mouse' || layer.dataset.trail !== 'true') return;
+      const now = performance.now();
+      if (now - lastTime < 38 || Math.hypot(event.clientX - lastX, event.clientY - lastY) < 7) return;
+      lastTime = now;
+      lastX = event.clientX;
+      lastY = event.clientY;
+      particle(lastX, lastY, (Math.random() - .5) * 28, 24 + Math.random() * 22, 13 + Math.random() * 9, Math.floor(Math.random() * 4), 850);
+    }, { passive: true });
+
+    document.addEventListener('pointerdown', event => {
+      if (reducedMotion.matches || layer.dataset.burst !== 'true' || !event.isPrimary || event.button !== 0) return;
+      const x = event.clientX;
+      const y = event.clientY;
+      const ring = document.createElement('span');
+      ring.className = 'absolute size-20 rounded-full border-2 border-(--accent) shadow-[0_0_20px_var(--accent)]';
+      ring.style.left = `${x}px`;
+      ring.style.top = `${y}px`;
+      layer.append(ring);
+      ring.animate([
+        { transform: 'translate(-50%,-50%) scale(.15)', opacity: .9 },
+        { transform: 'translate(-50%,-50%) scale(1.5)', opacity: 0 },
+      ], { duration: 800, easing: 'ease-out', fill: 'forwards' }).finished.then(() => ring.remove(), () => ring.remove());
+      for (let i = 0; i < 12; i++) {
+        const angle = i * Math.PI / 6;
+        const distance = 38 + Math.random() * 42;
+        particle(x, y, Math.cos(angle) * distance, Math.sin(angle) * distance - 12, 18 + Math.random() * 12, i, 1000);
+      }
+    }, { passive: true });
+
+    reducedMotion.addEventListener('change', () => {
+      if (reducedMotion.matches) layer.replaceChildren();
+    });
+    // La apertura solo se reproduce en cada carga; el historial restaurado queda visible.
+    window.addEventListener('pageshow', event => {
+      if (event.persisted) document.querySelector('[data-opening]')?.remove();
+    });
+  }
+</script>
