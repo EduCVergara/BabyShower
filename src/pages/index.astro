@@ -1,0 +1,70 @@
+---
+import { invitation as config } from '../config/invitation';
+
+const { latitude, longitude, provider } = config.location;
+const hasLocation = latitude !== null && longitude !== null;
+const coordinates = `${latitude},${longitude}`;
+const mapUrl = hasLocation
+  ? provider === 'waze'
+    ? `https://www.waze.com/ul?ll=${encodeURIComponent(coordinates)}&navigate=yes`
+    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(coordinates)}`
+  : undefined;
+const phone = config.whatsapp.phone.replace(/\D/g, '');
+const rsvpUrl = phone ? `https://wa.me/${phone}?text=${encodeURIComponent(config.whatsapp.message)}` : undefined;
+const position = (button: {x: number; y: number; width: number}) =>
+  `--x:${button.x}%;--y:${button.y}%;--width:${button.width}%`;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#fbf2ed" />
+    <meta name="description" content={config.description} />
+    <meta property="og:title" content={config.title} />
+    <meta property="og:description" content={config.description} />
+    <title>{config.title}</title>
+  </head>
+  <body>
+    <main>
+      <h1 class="sr-only">{config.title}</h1>
+      <div class="invitation">
+        <img class="artwork" src={config.image} alt={config.imageAlt} width="1024" height="1536" fetchpriority="high" />
+        {config.animations && <div class="hearts" aria-hidden="true">
+          {[0, 1, 2, 3, 4, 5].map(i => <span style={`--i:${i}`}>♡</span>)}
+        </div>}
+        <a class="action" style={position(config.buttons.location)} href={mapUrl}
+          aria-disabled={!mapUrl ? 'true' : undefined} target="_blank" rel="noopener noreferrer"
+          aria-label={mapUrl ? 'Ver ubicación del evento' : 'Ubicación pendiente de configurar'}>
+          <span aria-hidden="true">⌖</span> Ver ubicación
+        </a>
+        <a class="action" style={position(config.buttons.rsvp)} href={rsvpUrl}
+          aria-disabled={!rsvpUrl ? 'true' : undefined} target="_blank" rel="noopener noreferrer"
+          aria-label={rsvpUrl ? 'Confirmar asistencia por WhatsApp' : 'Confirmación pendiente de configurar'}>
+          <span aria-hidden="true">♡</span> Confirmar asistencia
+        </a>
+      </div>
+      {(!mapUrl || !rsvpUrl) && <p class="notice">Pronto podrás consultar la ubicación y confirmar tu asistencia aquí.</p>}
+    </main>
+  </body>
+</html>
+
+<style>
+  :global(*) { box-sizing: border-box; }
+  :global(body) { margin: 0; background: #fbf2ed; color: #765c55; font-family: Georgia, serif; }
+  main { max-width: 680px; margin: auto; }
+  .invitation { position: relative; container-type: inline-size; box-shadow: 0 8px 70px #9b665521; }
+  .artwork { display: block; width: 100%; height: auto; }
+  .action { position: absolute; left: var(--x); top: var(--y); width: var(--width); min-height: 44px; height: 3.8%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; gap: .45em; border: 1px solid #fff8; border-radius: 999px; background: linear-gradient(135deg, #e9a3a5, #d9848b); color: #fff; text-decoration: none; font-size: clamp(10px, 2.65cqw, 19px); font-style: italic; box-shadow: 0 2px 5px #98535a40, inset 0 0 0 2px #ffffff35; transition: filter .2s, box-shadow .2s; white-space: nowrap; }
+  .action span { font-size: 1.5em; }
+  .action:hover { filter: brightness(1.06); box-shadow: 0 3px 12px #98535a60; }
+  .action:focus-visible { outline: 3px solid #794a56; outline-offset: 4px; }
+  .action[aria-disabled] { cursor: default; }
+  .hearts { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .hearts span { position: absolute; left: calc(8% + var(--i) * 16%); bottom: 4%; font-size: clamp(15px, 3cqw, 24px); color: #cc828b; opacity: 0; animation: float 12s linear infinite; animation-delay: calc(var(--i) * -2s); }
+  @keyframes float { 0% { transform: translate(0, 0) rotate(-12deg); opacity: 0; } 15%, 65% { opacity: .45; } 100% { transform: translate(18px, -65cqw) rotate(15deg); opacity: 0; } }
+  .notice { text-align: center; font-size: 14px; padding: 0 20px 16px; line-height: 1.5; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) { .hearts { display: none; } .action { transition: none; } }
+</style>
