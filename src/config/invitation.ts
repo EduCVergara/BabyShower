@@ -94,6 +94,7 @@ export const templates = {
     variants: mobileVariants.rosa,
     image: '/plantilla-rosa.png', width: 1086, height: 1448,
     accent: '#d8818c', ink: '#71665e', background: '#fcf3ef',
+    calendarSurface: '#b8887930', calendarHover: '#b8887945',
     layout: { ...layout },
     buttons: {
       location: { x: 50, y: 83.15, width: 40.5, height: 4, fontSize: 2.85 },
@@ -104,6 +105,7 @@ export const templates = {
     variants: mobileVariants.celeste,
     image: '/plantilla-celeste.png', width: 1086, height: 1448,
     accent: '#639ab9', ink: '#656765', background: '#f0f7fa',
+    calendarSurface: '#639ab930', calendarHover: '#639ab945',
     layout: { ...layout },
     buttons: {
       location: { x: 50, y: 82.5, width: 39, height: 4, fontSize: 2.85 },
@@ -125,10 +127,10 @@ export const invitation = {
     name: babyName, event: 'BABY SHOWER',
     introduction: 'Una hermosa princesa pronto llegará a iluminar\nnuestras vidas. Esperamos compartir juntos y así\ncelebrar la vida y llegada de nuestra bebé',
     announcement: '¡TE INVITAMOS A CELEBRAR CON NOSOTROS!',
-    weekday: 'SÁBADO', day: '19', month: 'SEPTIEMBRE',
-    timeLabel: 'A LAS', time: '10:00', period: 'AM',
+    weekday: 'SÁBADO', day: '21', month: 'NOVIEMBRE',
+    timeLabel: 'A LAS', time: '16:30', period: 'PM',
     parentsLabel: 'PADRES', parents: 'Dalia Ramírez &\nEduardo Constancio',
-    locationLabel: 'UBICACIÓN', address: 'Los Arenales 2101, Loreto, Caldera',
+    locationLabel: 'UBICACIÓN', address: 'Chorrillos 1058, Villa las Playas, Caldera',
     farewell: '¡Te esperamos!',
   },
   whatsapp: {
@@ -136,8 +138,8 @@ export const invitation = {
     phone: '56998692235', message: `Hola, ¡Confirmo mi asistencia al Baby Shower de ${babyName}!`,
   },
   location: {
-    latitude: -27.075361362626538 as number | null,
-    longitude: -70.8392184609975 as number | null,
+    latitude: -27.072154003583027 as number | null,
+    longitude: -70.80745480146872 as number | null,
     provider: 'google' as 'google' | 'waze',
   },
   buttons: {
@@ -145,6 +147,15 @@ export const invitation = {
     rsvp: { label: 'Confirmar asistencia' },
   },
   animations: true,
+  calendar: {
+    enabled: true,
+    // Recordatorios antes del inicio, incluidos en el archivo .ics.
+    reminderHours: [24, 3],
+    // Fecha completa y desfase horario. Mantén estos valores alineados con text.
+    start: '2026-11-21T16:30:00-03:00',
+    end: '2026-11-21T18:30:00-03:00',
+    timeZone: 'America/Santiago',
+  },
   effects: {
     opening: true,
     cursorTrail: true,

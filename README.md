@@ -33,6 +33,28 @@ La apertura se reproduce en cada carga y se desvanece automáticamente incluso s
 
 ## Personalizar
 
+### Agregar al calendario
+
+El bloque de fecha y hora es clicable, con fondo y hover adaptados al color de la plantilla. Abre un selector entre Google Calendar y un archivo iCalendar (`/evento.ics`) para importar en la aplicación elegida por el dispositivo. El visitante revisa y guarda el evento; no se solicitan permisos de acceso a su calendario.
+
+Configura `invitation.calendar` en `src/config/invitation.ts`:
+
+```ts
+calendar: {
+  enabled: true,
+  reminderHours: [24, 3],
+  start: '2026-11-21T16:30:00-03:00',
+  end: '2026-11-21T18:30:00-03:00',
+  timeZone: 'America/Santiago',
+},
+```
+
+El año 2026 y las dos horas de duración son valores iniciales que debes confirmar. Usa fechas completas con desfase horario y mantén la fecha/hora de `text` alineada con estos valores. El título, descripción y dirección se obtienen de la invitación. Las posiciones del bloque se calculan a partir de las cajas de fecha y hora de cada formato. `calendarSurface` y `calendarHover` en cada plantilla controlan sus colores.
+
+El archivo `.ics` puede abrirse en una aplicación compatible o descargarse, según el navegador y el dispositivo; no es posible imponer desde la web una aplicación de calendario concreta. Tras cambiar la configuración, vuelve a compilar y publicar.
+
+`reminderHours: [24, 3]` incluye dos alarmas de notificación (`VALARM`, acción `DISPLAY`) en el archivo `.ics`: un día y tres horas antes del inicio. Usa `[]` para omitirlas. La aplicación receptora puede modificar o ignorar alarmas importadas según sus opciones y permisos de notificación. El enlace directo de Google Calendar conserva las notificaciones de la cuenta; el visitante debe revisarlas/añadirlas antes de guardar. Configurar recordatorios mediante la API de Google requeriría una integración autenticada adicional.
+
 - En `src/config/invitation.ts`, selecciona `template: 'rosa'` o `template: 'celeste'`. Cada plantilla define su imagen, dimensiones, colores y posiciones en `templates`.
 - Edita `text` para cambiar nombre, título del evento, párrafos, fecha, hora, papás, dirección y despedida. Usa `\n` para insertar saltos de línea. El contenido se renderiza como texto, sin interpretar HTML.
 - Configura `whatsapp.phone` con código de país y solo dígitos, y el mensaje.
