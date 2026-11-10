@@ -104,7 +104,7 @@ Abre http://localhost:4321. El servidor usa `PORT` cuando el hosting lo define.
 
 1. Confirmar año/fecha y contenido final. El teléfono y las coordenadas están configurados; la dirección visible todavía es un texto de ejemplo.
 2. Revisar ambas composiciones en teléfonos de 320–430 px y escritorio; ajustar posiciones y preparar imágenes más livianas si hace falta.
-3. Probar enlaces en Android/iPhone, envío manual del mensaje y preferencia de movimiento reducido. Añadir imagen social y favicon definitivos.
+3. Probar enlaces en Android/iPhone, envío manual del mensaje y preferencia de movimiento reducido. Añadir imagen social definitiva.
 4. Subir los cambios al repositorio GitHub y conectarlo a Railway.
 5. En Railway, usar los comandos de `railway.json`, generar el dominio público del servicio y verificar los enlaces en el sitio publicado. Comprobar costos y límites del plan antes de publicar: un dominio genérico no garantiza hosting gratuito.
 

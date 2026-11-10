@@ -53,6 +53,9 @@ const actionClasses = `${placedClasses} action z-1 rounded-full pl-[6.5%] pr-[1.
     <meta property="og:title" content={config.title} />
     <meta property="og:description" content={config.description} />
     <title>{config.title}</title>
+    <link rel="icon" type="image/svg+xml" href={`/favicon-${config.template}.svg`} />
+    <link rel="icon" type="image/png" sizes="32x32" href={`/favicon-${config.template}-32.png`} />
+    <link rel="apple-touch-icon" sizes="180x180" href={`/apple-touch-icon-${config.template}.png`} />
   </head>
   <body class="m-0 grid min-h-svh place-items-center bg-(--paper) font-body text-(--ink) [padding:env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]" style={`--accent:${template.accent};--ink:${template.ink};--paper:${template.background};--calendar-surface:${template.calendarSurface};--calendar-hover:${template.calendarHover}`}>
     <InvitationEffects enabled={config.animations} effects={config.effects} />
