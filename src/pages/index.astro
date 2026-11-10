@@ -4,6 +4,7 @@ import '@fontsource/cormorant-garamond/latin-400.css';
 import '@fontsource/cormorant-garamond/latin-400-italic.css';
 import '../styles/global.css';
 import InvitationEffects from '../components/InvitationEffects.astro';
+import NameGlow from '../components/NameGlow.astro';
 import { calendarEvent } from '../lib/calendar';
 import { invitation as config, templates, responsiveMedia, type Placement } from '../config/invitation';
 
@@ -26,14 +27,17 @@ const bodyKeys = ['introduction', 'day', 'time', 'parents', 'address'];
 const dateKeys = ['weekday', 'day', 'month', 'timeLabel', 'time', 'period'];
 const calendar = config.calendar.enabled ? calendarEvent() : null;
 // La zona clicable sigue las cajas de fecha/hora de cada composición.
-function calendarBox(layout: typeof template.layout): Placement {
+function calendarBox(layout: typeof template.layout, { paddingY = .6, offsetY = 0 } = {}): Placement {
   const boxes = dateKeys.map(key => layout[key as keyof typeof layout]);
   const left = Math.min(...boxes.map(box => box.x - box.width / 2)) - .7;
   const right = Math.max(...boxes.map(box => box.x + box.width / 2)) + .7;
-  const top = Math.min(...boxes.map(box => box.y - box.height / 2)) - .6;
-  const bottom = Math.max(...boxes.map(box => box.y + box.height / 2)) + .6;
-  return { x: (left + right) / 2, y: (top + bottom) / 2, width: right - left, height: bottom - top, fontSize: 2 };
+  const top = Math.min(...boxes.map(box => box.y - box.height / 2)) - paddingY;
+  const bottom = Math.max(...boxes.map(box => box.y + box.height / 2)) + paddingY;
+  return { x: (left + right) / 2, y: (top + bottom) / 2 + offsetY, width: right - left, height: bottom - top, fontSize: 2 };
 }
+// Escritorio: menos altura y un leve desplazamiento hacia arriba para dejar
+// márgenes equilibrados entre los separadores dibujados en la plantilla.
+const desktopCalendarBox = calendarBox(template.layout, { paddingY: .2, offsetY: -.2 });
 // Clases compartidas para editar una sola vez todos los textos y botones.
 const placedClasses = 'placed invitation-position absolute -translate-x-1/2 -translate-y-1/2 m-0 flex items-center justify-center text-center font-normal leading-[1.15]';
 const fitClasses = 'block max-w-full whitespace-pre-wrap [overflow-wrap:anywhere]';
@@ -53,7 +57,7 @@ const actionClasses = `${placedClasses} action z-1 rounded-full pl-[6.5%] pr-[1.
   <body class="m-0 grid min-h-svh place-items-center bg-(--paper) font-body text-(--ink) [padding:env(safe-area-inset-top)_env(safe-area-inset-right)_env(safe-area-inset-bottom)_env(safe-area-inset-left)]" style={`--accent:${template.accent};--ink:${template.ink};--paper:${template.background};--calendar-surface:${template.calendarSurface};--calendar-hover:${template.calendarHover}`}>
     <InvitationEffects enabled={config.animations} effects={config.effects} />
     <main class="invitation-frame m-auto">
-      <div class="invitation relative [container-type:inline-size] shadow-[0_8px_70px_#9b665521]">
+      <div class="invitation relative @container shadow-[0_8px_70px_#9b665521]">
         <picture>
           <source media={responsiveMedia.tall} srcset={template.variants.tall.image} width={template.variants.tall.width} height={template.variants.tall.height} />
           <source media={responsiveMedia.mobile} srcset={template.variants.mobile.image} width={template.variants.mobile.width} height={template.variants.mobile.height} />
@@ -61,15 +65,16 @@ const actionClasses = `${placedClasses} action z-1 rounded-full pl-[6.5%] pr-[1.
         </picture>
         {calendar && <button type="button" data-calendar-open aria-haspopup="dialog" aria-controls="calendar-dialog" aria-label="Agregar la fecha y hora del evento a mi calendario" title="Agregar al calendario"
           class={`${placedClasses} cursor-pointer rounded-xl border border-(--accent)/20 bg-(--calendar-surface) text-(--accent) transition-colors duration-200 hover:bg-(--calendar-hover) focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-(--accent) motion-reduce:transition-none`}
-          style={position(calendarBox(template.layout), calendarBox(template.variants.mobile.layout), calendarBox(template.variants.tall.layout))}>
+          style={position(desktopCalendarBox, calendarBox(template.variants.mobile.layout), calendarBox(template.variants.tall.layout))}>
           <svg aria-hidden="true" class="size-[clamp(10px,2.2cqw,18px)] rounded-sm bg-(--paper)" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M7 3v4m10-4v4M3 11h18m-9 3v4m-2-2h4"/></svg>
         </button>}
         {entries.map(([key, value]) => {
           const Tag = key === 'name' ? 'h1' : 'p';
-          return <Tag data-text={key} class:list={[placedClasses, bodyKeys.includes(key) ? 'text-(--ink)' : 'text-(--accent)', { 'pointer-events-none': Boolean(calendar) && dateKeys.includes(key), 'font-script leading-[1.1]': scriptKeys.includes(key), 'tracking-[0.075em]': !scriptKeys.includes(key) && !bodyKeys.includes(key) }]} style={position(template.layout[key], template.variants.mobile.layout[key], template.variants.tall.layout[key])}>
+          return <Tag data-text={key} class:list={[placedClasses, bodyKeys.includes(key) ? 'text-(--ink)' : 'text-(--accent)', { isolate: key === 'name', 'pointer-events-none': Boolean(calendar) && dateKeys.includes(key), 'font-script leading-[1.1]': scriptKeys.includes(key), 'tracking-[0.075em]': !scriptKeys.includes(key) && !bodyKeys.includes(key) }]} style={position(template.layout[key], template.variants.mobile.layout[key], template.variants.tall.layout[key])}>
             {key === 'name' ? <>
               <span class="sr-only">{value}</span>
-              <svg data-name-arc={config.nameArc} class="block h-full w-full overflow-visible" aria-hidden="true">
+              {config.animations && config.effects.nameGlow && <NameGlow />}
+              <svg data-name-arc={config.nameArc} class="relative z-10 block h-full w-full overflow-visible" aria-hidden="true">
                 <defs><path id="name-curve" /></defs>
                 <text class="fill-current"><textPath href="#name-curve" startOffset="50%" text-anchor="middle">{value}</textPath></text>
               </svg>

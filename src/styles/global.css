@@ -4,9 +4,9 @@
   --font-body: "Cormorant Garamond", Georgia, serif;
   --font-script: "Great Vibes", cursive;
   --animate-float: float 12s linear infinite;
-  --animate-opening-veil: opening-veil 2.8s ease-in-out both;
-  --animate-powder-ring: powder-ring 2.6s ease-out both;
-  --animate-opening-mote: opening-mote 2.3s ease-out both;
+  --animate-opening-veil: opening-veil 1.6s ease-in-out both;
+  --animate-powder-ring: powder-ring 1.45s ease-out both;
+  --animate-opening-mote: opening-mote 1.25s ease-out both;
 
   @keyframes opening-veil {
     0%, 30% { opacity: 1; visibility: visible; }

@@ -14,7 +14,7 @@ const { enabled, effects } = Astro.props;
       {Array.from({ length: 64 }, (_, i) => {
         const angle = i * 2.39996;
         const radius = 34 + (i % 7) * 2;
-        return <span class="absolute left-1/2 top-1/2 size-(--mote-size) animate-opening-mote rounded-full bg-(--accent) opacity-0 shadow-[0_0_8px_var(--accent)] [animation-delay:var(--delay)]" style={`--dx:${Math.cos(angle) * radius}vw;--dy:${Math.sin(angle) * radius}vw;--delay:${(i % 9) * 45}ms;--mote-size:${2 + i % 5}px`} />;
+        return <span class="absolute left-1/2 top-1/2 size-(--mote-size) animate-opening-mote rounded-full bg-(--accent) opacity-0 shadow-[0_0_8px_var(--accent)] [animation-delay:var(--delay)]" style={`--dx:${Math.cos(angle) * radius}vw;--dy:${Math.sin(angle) * radius}vw;--delay:${(i % 9) * 25}ms;--mote-size:${2 + i % 5}px`} />;
       })}
       <div class="absolute inset-[32%] animate-powder-ring rounded-full bg-white/80 blur-2xl" />
     </div>

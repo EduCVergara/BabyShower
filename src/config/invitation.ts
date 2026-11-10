@@ -157,6 +157,7 @@ export const invitation = {
     timeZone: 'America/Santiago',
   },
   effects: {
+    nameGlow: true,
     opening: true,
     cursorTrail: true,
     touchBurst: true,

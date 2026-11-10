@@ -1,0 +1,100 @@
+<!-- El brillo queda detrás del SVG para conservar el color y la legibilidad del nombre. -->
+<div data-name-glow class="pointer-events-none absolute inset-0 z-0 motion-reduce:hidden" aria-hidden="true">
+  <span data-glow-light class="absolute left-0 top-0 h-[95%] w-[30%] rounded-full bg-[radial-gradient(ellipse,white_0%,#fffffff0_20%,#ffffff80_48%,transparent_74%)] opacity-0 blur-[4px] will-change-transform" />
+</div>
+
+<script>
+  const layer = document.querySelector<HTMLElement>('[data-name-glow]');
+  if (layer) {
+    const name = layer.closest<HTMLElement>('[data-text="name"]')!;
+    const light = layer.querySelector<HTMLElement>('[data-glow-light]')!;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+    let active: Animation | undefined;
+    let hovering = false;
+    const translate = (x: number, y: number) => `translate(${x}px,${y}px) translate(-50%,-50%)`;
+
+    function burst(x: number, y: number) {
+      if (reduced.matches) return;
+      for (let i = 0; i < 13; i++) {
+        const spark = document.createElement('span');
+        spark.className = 'absolute left-0 top-0 rounded-full bg-white shadow-[0_0_8px_2px_white]';
+        const size = i === 0 ? 12 : 2 + Math.random() * 3;
+        spark.style.width = spark.style.height = `${size}px`;
+        layer!.append(spark);
+        const angle = i * Math.PI / 6;
+        const distance = i === 0 ? 0 : 14 + Math.random() * 24;
+        const animation = spark.animate([
+          { transform: `${translate(x, y)} scale(.3)`, opacity: 0 },
+          { transform: `${translate(x, y)} scale(1)`, opacity: 1, offset: .15 },
+          { transform: `${translate(x + Math.cos(angle) * distance, y + Math.sin(angle) * distance)} scale(0)`, opacity: 0 },
+        ], { duration: i === 0 ? 450 : 700, easing: 'ease-out' });
+        animation.finished.then(() => spark.remove(), () => spark.remove());
+      }
+    }
+
+    async function sweep() {
+      await document.fonts.ready;
+      const opening = document.querySelector('[data-opening]');
+      if (opening) await Promise.all(opening.getAnimations().map(animation => animation.finished.catch(() => {})));
+      // Espera el cálculo final del tamaño del nombre antes de medir sus letras.
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      if (reduced.matches || hovering || !layer!.isConnected) return;
+      const box = name.getBoundingClientRect();
+      const path = name.querySelector<SVGPathElement>('#name-curve')!;
+      const text = name.querySelector<SVGTextElement>('svg text')!;
+      const matrix = path.getScreenCTM();
+      if (!matrix) return;
+      const length = path.getTotalLength();
+      const textLength = Math.min(length, text.getComputedTextLength());
+      const start = (length - textLength) / 2;
+      // Usa el mismo trazado del textPath y centra el brillo en las letras,
+      // ligeramente por encima de su línea base.
+      const glyphOffset = parseFloat(getComputedStyle(text).fontSize) * .3;
+      const pointAt = (progress: number) => {
+        const point = path.getPointAtLength(start + textLength * progress);
+        const screen = new DOMPoint(point.x, point.y - glyphOffset).matrixTransform(matrix);
+        return { x: screen.x - box.left, y: screen.y - box.top };
+      };
+      const frames = Array.from({ length: 41 }, (_, index) => {
+        const progress = index / 40;
+        const point = pointAt(progress);
+        return {
+          transform: translate(point.x, point.y),
+          opacity: Math.min(1, progress / .15, (1 - progress) / .1),
+          offset: progress,
+        };
+      });
+      const animation = light.animate(frames, { duration: 1100, easing: 'ease-in-out' });
+      active = animation;
+      try {
+        await animation.finished;
+        const end = pointAt(1);
+        if (!hovering && !reduced.matches) burst(end.x, end.y);
+      } catch { /* El cursor o el movimiento reducido pueden interrumpir el barrido. */ }
+    }
+
+    name.addEventListener('pointermove', event => {
+      if (reduced.matches || event.pointerType !== 'mouse') return;
+      hovering = true;
+      active?.cancel();
+      const box = name.getBoundingClientRect();
+      light.style.transform = translate(event.clientX - box.left, event.clientY - box.top);
+      light.style.opacity = '1';
+    }, { passive: true });
+    name.addEventListener('pointerleave', () => {
+      if (!hovering) return;
+      hovering = false;
+      active?.cancel();
+      active = light.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 250 });
+      light.style.opacity = '0';
+    });
+    reduced.addEventListener('change', () => {
+      if (reduced.matches) {
+        active?.cancel();
+        light.style.opacity = '0';
+        layer.querySelectorAll('span:not([data-glow-light])').forEach(spark => spark.remove());
+      }
+    });
+    void sweep();
+  }
+</script>
